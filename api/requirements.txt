@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+numpy
+joblib
+python-multipart
+datetime
+typing
+pathlib
+scikit-learn
