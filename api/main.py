@@ -4,12 +4,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from joblib import load
 from typing import List
-import uvicorn
 import numpy as np
 
 
 MODEL_DIR = Path("../trainedModels")
-HOST, PORT = "0.0.0.0", 8000
+app = FastAPI()
 
 
 def validate_inputs(values: List[float]):
@@ -33,8 +32,7 @@ def validate_inputs(values: List[float]):
         ("Age", int, (0, 13))
     ]
 
-    if len(values) != len(fields):
-        raise HTTPException(status_code=400, detail=f"Expected {len(fields)} inputs, got {len(values)}.")
+    if len(values) != len(fields): raise HTTPException(status_code=400, detail=f"Expected {len(fields)} inputs, got {len(values)}.")
 
     for i, (name, typ, rule) in enumerate(fields):
         val = values[i]
@@ -66,14 +64,10 @@ def get_latest_model_path():
 def load_model(filename):
     with open(filename, "rb") as f: return load(f)
 
-
-app = FastAPI()
-
-
 current_model_path = get_latest_model_path()
 model = load_model(current_model_path)
 
-
+# Allow CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -91,9 +85,9 @@ def home(): return {"message": "API is Live", "model": current_model_path.name}
 def predict(inputs: str):
     global model, current_model_path
 
+    # Reload model if a new one is available
     latest_path = get_latest_model_path()
     if latest_path != current_model_path:
-        print(f"New model detected: {latest_path.name}")
         model = load_model(latest_path)
         current_model_path = latest_path
 
@@ -110,7 +104,3 @@ def predict(inputs: str):
         "confidence": confidence,
         "model": current_model_path.name
     }
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host=HOST, port=PORT)
