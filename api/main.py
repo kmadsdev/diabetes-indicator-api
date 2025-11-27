@@ -7,7 +7,8 @@ from typing import List
 import numpy as np
 
 
-MODEL_DIR = Path("../trainedModels")
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_DIR = BASE_DIR / "trainedModels"
 app = FastAPI()
 
 
@@ -32,17 +33,21 @@ def validate_inputs(values: List[float]):
         ("Age", int, (0, 13))
     ]
 
-    if len(values) != len(fields): raise HTTPException(status_code=400, detail=f"Expected {len(fields)} inputs, got {len(values)}.")
+    if len(values) != len(fields): 
+        raise HTTPException(status_code=400, detail=f"Expected {len(fields)} inputs, got {len(values)}.")
 
     for i, (name, typ, rule) in enumerate(fields):
         val = values[i]
+
         try: val = typ(val)
         except: raise HTTPException(status_code=400, detail=f"{name} must be of type {typ.__name__}.")
 
-        if isinstance(rule, list):
-            if val not in rule: raise HTTPException(status_code=400, detail=f"{name} must be one of {rule}.")
-        elif isinstance(rule, tuple):
-            if not (rule[0] <= val <= rule[1]): raise HTTPException(status_code=400, detail=f"{name} must be between {rule[0]} and {rule[1]}.")
+        if isinstance(rule, list): 
+            if val not in rule: 
+                raise HTTPException(status_code=400, detail=f"{name} must be one of {rule}.")
+        elif isinstance(rule, tuple): 
+            if not (rule[0] <= val <= rule[1]): 
+                raise HTTPException(status_code=400, detail=f"{name} must be between {rule[0]} and {rule[1]}.")
     return values
 
 
@@ -64,6 +69,7 @@ def get_latest_model_path():
 def load_model(filename):
     with open(filename, "rb") as f: return load(f)
 
+
 current_model_path = get_latest_model_path()
 model = load_model(current_model_path)
 
@@ -78,7 +84,8 @@ app.add_middleware(
 
 
 @app.get("/")
-def home(): return {"message": "API is Live", "model": current_model_path.name}
+def home(): 
+    return {"message": "API is Live", "model": current_model_path.name}
 
 
 @app.get("/predict")
@@ -101,6 +108,6 @@ def predict(inputs: str):
 
     return {
         "prediction": y,
-        "confidence": confidence,
+        "accuracy": confidence,
         "model": current_model_path.name
     }

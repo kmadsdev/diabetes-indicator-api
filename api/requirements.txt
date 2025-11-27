@@ -1,7 +1,0 @@
-fastapi
-numpy
-joblib
-datetime
-typing
-pathlib
-mangum
