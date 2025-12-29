@@ -8,29 +8,29 @@ import numpy as np
 
 
 BASE_DIR = Path(__file__).resolve().parent
-MODEL_DIR = BASE_DIR / "trainedModels"
+MODEL_DIR = BASE_DIR / "trained-models"
 app = FastAPI()
 
 
 def validate_inputs(values: List[float]):
     fields = [
-        ("HighBP", int, [0, 1]),
-        ("HighChol", int, [0, 1]),
-        ("CholCheck", int, [0, 1]),
-        ("BMI", float, (0, 1000)),
-        ("Smoker", int, [0, 1]),
-        ("Stroke", int, [0, 1]),
-        ("HeartDiseaseorAttack", int, [0, 1]),
-        ("PhysActivity", int, [0, 1]),
-        ("Fruits", int, [0, 1]),
-        ("Veggies", int, [0, 1]),
-        ("HvyAlcoholConsump", int, [0, 1]),
-        ("AnyHealthCare", int, [0, 1]),
-        ("NoDocbcCost", int, [0, 1]),
-        ("GenHlth", int, (1, 5)),
-        ("DiffWalk", int, [0, 1]),
-        ("Sex", int, [0, 1]),
-        ("Age", int, (0, 13))
+        ("HighBP",               int,   [0, 1]),
+        ("HighChol",             int,   [0, 1]),
+        ("CholCheck",            int,   [0, 1]),
+        ("BMI",                  float, (0, 275)), # realistic BMI range i gues
+        ("Smoker",               int,   [0, 1]),
+        ("Stroke",               int,   [0, 1]),
+        ("HeartDiseaseorAttack", int,   [0, 1]),
+        ("PhysActivity",         int,   [0, 1]),
+        ("Fruits",               int,   [0, 1]),
+        ("Veggies",              int,   [0, 1]),
+        ("HvyAlcoholConsump",    int,   [0, 1]),
+        ("AnyHealthCare",        int,   [0, 1]),
+        ("NoDocbcCost",          int,   [0, 1]),
+        ("GenHlth",              int,   (1, 5)), # between 1 and 5
+        ("DiffWalk",             int,   [0, 1]),
+        ("Sex",                  int,   [0, 1]),
+        ("Age",                  int,   (0, 13)) # groups 0-13
     ]
 
     if len(values) != len(fields): 
@@ -53,7 +53,7 @@ def validate_inputs(values: List[float]):
 
 def get_latest_model_path():
     pkl_files = list(MODEL_DIR.glob("*.pkl"))
-    if not pkl_files: raise FileNotFoundError(f"No .pkl files found in {MODEL_DIR}")
+    if not pkl_files: raise FileNotFoundError(f"No *.pkl files found in {MODEL_DIR}")
 
     def extract_datetime(path):
         try:
@@ -84,8 +84,17 @@ app.add_middleware(
 
 
 @app.get("/")
-def home(): 
-    return {"message": "API is Live", "model": current_model_path.name}
+def home(): return {"message": "API is Live", "model": current_model_path.name}
+
+
+@app.get("/health")
+def health(): return {"status": 1}
+
+
+@app.get("/models")
+def list_models():
+    pkl_files = list(MODEL_DIR.glob("*.pkl"))
+    return {"models": [f.name for f in pkl_files]}
 
 
 @app.get("/predict")
@@ -103,6 +112,7 @@ def predict(inputs: str):
 
     X = [validate_inputs(X)]
     proba = model.predict_proba(X)[0]
+
     y = int(np.argmax(proba))
     confidence = round(proba[y] * 100, 2)
 
