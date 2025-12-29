@@ -1,32 +1,31 @@
-# diabetes-indicator-api
+# Diabetes Indicator - Backend
 API for the Diabetes Indicator App -> [kmads.dev/github/diabetes-indicator](https://kmads.dev/diabetes-indicator/)<br>
 Acess the diabetes-indicator repository here: [kmads.dev/source-code/diabetes-indicator](https://kmads.dev/diabetes-indicator)
 
 ```
-    diabetes-indicator-api
-    ⊢ api/
-    |  ⊢ app.py (running on vercel, fastapi + uvicorn)
-    |  ⌞ requirements.txt (dependencies to deploy the api)
-    |
-    ⊢ trainedModels/ 
-    |  ⌞ <.pkl files>
-    |
-    ⌞ README, LICENSE, ...
+    diabetes-indicator-backend
+    ⊢ trained-models/ 
+    |  ⌞ <.pkl files> (models trained and ready for production)
+    ⊢ machine-learning/
+    |  ⌞ ml.ipynb (python notebook where the models are trained)
+    ⊢ main.py (API made with fastapi and uvicorn)
+    ⊢ requirements.txt (python dependencies)
+    ⊢ vercel.json (vercel deploy config)
+    ⌞ README.md
 ```
 
 ### Infra / Architecture
-- **Frontend:** `kmadsdev/diabetes-indicator/docs`
-- **Backend:** `kmadsdev/diabetes-indicator-api/api`
-- **Machine Learning:** `kmadsdev/diabetes-indicator/predictionModel` & `kmadsdev/diabetes-indicator-api/trainedModels`
+Overview
+- **Frontend: [Source](https://source.kmads.dev/diabetes-indicator/) | [Live Deploy](https://kmads.dev/diabetes-indicator/)**
+- **Backend + Machine Learning: [Source](https://source.kmadsdev/diabetes-indicator-backend/)**
 
-Architecture:
-- ***`Client`*** Request request prediction from ***`docs/` (github pages)*** 
-- ***`docs/` (github pages)*** gets prediction from ***`api/` (vercel)***
-- ***`api/` (vercel)*** gets the latest model (.pkl) model from ***`trainedModels/` (github)***
-- ***`trainedModels/` (github)*** gets the model (.pkl) from ***`predictionModel/` (github)***
+Flow
+- **`client`** Request request prediction from the **`frontend`**
+- **`frontend`** gets prediction from **`api/`**
+- **`backend`** choose the latest model (.pkl) from **`trained-models/`**
+- **`trained-models/`** receives the model (.pkl) from **`machine-learning/`**
 
 Simplified: <br>
-- Client -> Frontend (docs/) -> Backend (api/) <br> 
-- Backend (api/) -> model.pkl (trainedModels/) -> ml.ipynb (predictionModel/)
+- Client -> Frontend <-> Backend -> `<model>.pkl` (trainedModels/)
 
-![Architecture](https://raw.githubusercontent.com/kmadsdev/diabetes-indicator/main/assets/infra/architecture-2025-11-18.svg)
+![Architecture](assets/infra/architecture-2025-11-18.svg)
